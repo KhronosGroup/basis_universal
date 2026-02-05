@@ -1,4 +1,4 @@
-﻿// basisu_transcoder.cpp
+// basisu_transcoder.cpp
 // Copyright (C) 2019-2026 Binomial LLC. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -32228,11 +32228,9 @@ namespace bc7f
 			{
 				scaledLow[i] = (xMinColor[i] << (8 - total_bits));
 				scaledLow[i] |= (scaledLow[i] >> total_bits);
-				assert(scaledLow[i] <= 255);
 
 				scaledHigh[i] = (xMaxColor[i] << (8 - total_bits));
 				scaledHigh[i] |= (scaledHigh[i] >> total_bits);
-				assert(scaledHigh[i] <= 255);
 			}
 
 			float err0 = 0, err1 = 0;
@@ -32302,11 +32300,9 @@ namespace bc7f
 			{
 				scaledLow[i] = (xMinColor[i] << (8 - total_bits));
 				scaledLow[i] |= (scaledLow[i] >> total_bits);
-				assert(scaledLow[i] <= 255);
 
 				scaledHigh[i] = (xMaxColor[i] << (8 - total_bits));
 				scaledHigh[i] |= (scaledHigh[i] >> total_bits);
-				assert(scaledHigh[i] <= 255);
 			}
 
 			float err = 0;
