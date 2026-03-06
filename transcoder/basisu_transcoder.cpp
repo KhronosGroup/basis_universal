@@ -22415,6 +22415,80 @@ namespace basist
 			return total_err;
 		}
 
+		static void assign_weights_simple_4(
+			const basist::half_float* pPixels,
+			uint8_t* pWeights,
+			int min_r, int min_g, int min_b,
+			int max_r, int max_g, int max_b, int64_t block_max_var, 
+			const fast_bc6h_params& params)
+		{
+			BASISU_NOTE_UNUSED(block_max_var);
+
+			float fmin_r = fast_half_to_float_pos_not_inf_or_nan((basist::half_float)min_r);
+			float fmin_g = fast_half_to_float_pos_not_inf_or_nan((basist::half_float)min_g);
+			float fmin_b = fast_half_to_float_pos_not_inf_or_nan((basist::half_float)min_b);
+
+			float fmax_r = fast_half_to_float_pos_not_inf_or_nan((basist::half_float)max_r);
+			float fmax_g = fast_half_to_float_pos_not_inf_or_nan((basist::half_float)max_g);
+			float fmax_b = fast_half_to_float_pos_not_inf_or_nan((basist::half_float)max_b);
+
+			float fdir_r = fmax_r - fmin_r;
+			float fdir_g = fmax_g - fmin_g;
+			float fdir_b = fmax_b - fmin_b;
+
+			float l = inv_sqrt(fdir_r * fdir_r + fdir_g * fdir_g + fdir_b * fdir_b);
+			if (l != 0.0f)
+			{
+				fdir_r *= l;
+				fdir_g *= l;
+				fdir_b *= l;
+			}
+
+			float lf = fmin_r * fdir_r + fmin_g * fdir_g + fmin_b * fdir_b;
+			float hf = fmax_r * fdir_r + fmax_g * fdir_g + fmax_b * fdir_b;
+
+			if ((lf >= basist::MAX_HALF_FLOAT) || (hf >= basist::MAX_HALF_FLOAT))
+			{
+				// v2.1: Can't use the faster half float based tricks below, need some sort of backup
+				vec3F float_pixels[16];
+				float pixel_scales[16];
+
+				for (uint32_t i = 0; i < 16; i++)
+				{
+					float_pixels[i].c[0] = fast_half_to_float_pos_not_inf_or_nan(pPixels[i * 3 + 0]);
+					float_pixels[i].c[1] = fast_half_to_float_pos_not_inf_or_nan(pPixels[i * 3 + 1]);
+					float_pixels[i].c[2] = fast_half_to_float_pos_not_inf_or_nan(pPixels[i * 3 + 2]);
+					
+					pixel_scales[i] = 1.0f / (basisu::squaref(float_pixels[i].c[0]) + basisu::squaref(float_pixels[i].c[1]) + basisu::squaref(float_pixels[i].c[2]) + (float)MIN_HALF_FLOAT);
+				}
+
+				assign_weights_4(
+					float_pixels, pixel_scales,
+					pWeights,
+					min_r, min_g, min_b,
+					max_r, max_g, max_b, block_max_var, false,
+					params);
+				
+				return;
+			}
+
+			float lr = ftoh(lf);
+			float hr = ftoh(hf);
+
+			float frr = (hr == lr) ? 0.0f : (14.93333f / (float)(hr - lr));
+
+			lr = (-lr * frr) + 0.53333f;
+			for (uint32_t i = 0; i < 16; i++)
+			{
+				const float r = fast_half_to_float_pos_not_inf_or_nan(pPixels[i * 3 + 0]);
+				const float g = fast_half_to_float_pos_not_inf_or_nan(pPixels[i * 3 + 1]);
+				const float b = fast_half_to_float_pos_not_inf_or_nan(pPixels[i * 3 + 2]);
+				const float w = ftoh(basisu::minimumf(r * fdir_r + g * fdir_g + b * fdir_b, basist::MAX_HALF_FLOAT));
+
+				pWeights[i] = (uint8_t)basisu::clamp((int)(w * frr + lr), 0, 15);
+			}
+		}
+
 		static void assign_weights3(uint8_t trial_weights[16],
 			uint32_t best_pat_bits,
 			uint32_t subset_min_r[2], uint32_t subset_min_g[2], uint32_t subset_min_b[2],
