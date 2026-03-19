@@ -1645,6 +1645,7 @@ static bool estimate_partition3_6x6(
 
 	float brightest_inten = 0.0f, darkest_inten = BIG_FLOAT_VAL;
 	vec3F cluster_centroids[NUM_SUBSETS];
+	clear_obj(cluster_centroids);
 
 	for (uint32_t i = 0; i < BLOCK_T; i++)
 	{
@@ -1702,7 +1703,7 @@ static bool estimate_partition3_6x6(
 	for (uint32_t s = 0; s < NUM_ITERS; s++)
 	{
 		memset(num_cluster_pixels, 0, sizeof(num_cluster_pixels));
-		memset(new_cluster_means, 0, sizeof(new_cluster_means));
+		memset((void *)new_cluster_means, 0, sizeof(new_cluster_means));
 
 		for (uint32_t i = 0; i < BLOCK_T; i++)
 		{
@@ -1902,7 +1903,6 @@ static bool encode_block_3_subsets(
 
 		if (failed_flag)
 			continue;
-
 		uint8_t ise_weights[BLOCK_W * BLOCK_H];
 
 		uint32_t src_pixel_index[NUM_SUBSETS] = { 0 };
