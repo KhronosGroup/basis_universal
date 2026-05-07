@@ -1,3 +1,6 @@
+<!-- Copyright 2016-2026 Binomial LLC -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # basis_universal v2.1
 An LDR/HDR portable GPU supercompressed texture transcoding system. 
 
@@ -27,10 +30,10 @@ The C/C++ encoder and transcoder libraries can be compiled to native code or Web
 
 Full Python support for encoding/transcoding is now available, supporting native or WASM modules, but is still in the early stages of development.
 
-License
--------
+License/Legal
+-------------
 
-The reference encoder library, transcoder, and most specification documents in this repo (unless otherwise explictly indicated) are Copyright © 2016–2026 Binomial LLC. All rights reserved except as granted under the [Apache 2.0 LICENSE](https://github.com/BinomialLLC/basis_universal/blob/master/LICENSE). "Basis Universal" is a trademark of Binomial LLC. See our Apache 2.0 [NOTICE file](https://github.com/BinomialLLC/basis_universal/wiki/NOTICE). If you modify the Basis Universal reference source code, specifications, or wiki documents and redistribute the files, you must cause any modified files to carry prominent notices stating that you changed the files (see Apache 2.0 §4(b)).
+The reference encoder library, transcoder, and most specification documents in this repo (unless otherwise explictly indicated) are Copyright © 2016–2026 Binomial LLC. All rights reserved except as granted under the [Apache 2.0 LICENSE](https://github.com/BinomialLLC/basis_universal/blob/master/LICENSE). Basis Universal™ is a trademark of Binomial LLC. KTX™ is a trademark of [The Khronos Group Inc.](https://www.khronos.org/ktx/) See our Apache 2.0 [NOTICE file](https://github.com/BinomialLLC/basis_universal/wiki/NOTICE). If you modify the Basis Universal reference source code, specifications, or wiki documents and redistribute the files, you must cause any modified files to carry prominent notices stating that you changed the files (see Apache 2.0 §4(b)).
 
 See our [DEP5 file](https://github.com/BinomialLLC/basis_universal/blob/master/.reuse/dep5) for the complete list of software and their licenses in this repo. The encoder library is Apache 2.0, but it utilizes some open source 3rd party modules (in 'encoder/3rdparty' and in the 'Zstd' directory) to load [.QOI](https://qoiformat.org/), [.DDS](https://github.com/DeanoC/tiny_dds), [.EXR](https://github.com/syoyo/tinyexr) images, to handle [Zstd](https://github.com/facebook/zstd) compression, and to unpack ASTC texture blocks. See the [LICENSES](https://github.com/BinomialLLC/basis_universal/tree/master/LICENSES) folder. The transcoder utilizes no 3rd party libraries or dependencies, other than Zstd (which is optional but limits the transcoder to non-Zstd utilizing codecs).
 
@@ -504,9 +507,9 @@ See our wiki page: [Project Policies: PRs, compiler warnings, release cadence et
 KTX2 Support Status
 -------------------
 
-Note as of Jan. 2026 we are working with Khronos on the exact details of how we embed UASTC HDR 6x6 intermediate and XUASTC LDR supercompressed texture data into the KTX2 file format. We expect some KTX2 file format changes to be merged in within a month or so. Our plan is to keep full compatiblity with our previously generated .KTX2 files.
+Note as of March 2026 we are working with Khronos on the exact details of how we embed XUASTC LDR supercompressed texture data into the KTX2 file format. KTX2 texture files using our previous codecs (including the recently added UASTC HDR 4x4 and UASTC HDR 6x6i formats) can now be interchanged with other KTX2 tools. See our [KTX2 technical information document](https://github.com/BinomialLLC/basis_universal/wiki/KTX2-File-Format-Support-Technical-Details) for more info.
 
-.basis files shouldn't be impacted.
+Whenever possible, we keep full introspection/transcode compatibility with all of our previously written KTX2 files, even if during standardization a file format change is made. We don't expect how we embed XUASTC LDR into KTX2 in basisu v2.1 to change.
 
 ----
 
@@ -516,20 +519,21 @@ Repository Licensing with REUSE
 The repository has been updated to be compliant with the REUSE license
 checking tool (https://reuse.software/). See the [.reuse](https://github.com/BinomialLLC/basis_universal/tree/master/.reuse) subdirectory.
 
-External Tool Links
--------------------
+External Links
+--------------
 
+- [btx - KTX2 Command Line Tool](https://github.com/BinomialLLC/KTX-Software-Binomial-Fork) - Our fork of KTX-Software with bug fixes, working HDR quality/effort controls, new options, and new codec integrations. This tool can validate, extract, and compress KTX2 files compatible with our project.
 - [ARM's astcenc](https://github.com/ARM-software/astc-encoder) - Crucial official tool from ARM which can unpack ASTC format LDR/HDR .astc and .ktx files to .png or .exr for testing and verification purposes.
-- [Online .EXR and .HDR Image File Viewer](https://viewer.openhdr.org/) - With strong tone mapping, auto-exposure, HDR histogram.
+- [Online .EXR and .HDR Image File Viewer](https://viewer.openhdr.org/) - OpenHDR Viewer. Has a very well implemented tone mapper, auto-exposure, and HDR histogram.
 - [Windows HDR + WCG Image Viewer](https://13thsymphony.github.io/hdrimageviewer/) - A true HDR image viewer for Windows which works on HDR monitors. Also see [the github repo](https://github.com/13thsymphony/HDRImageViewer).
-- [KTX-Software](https://github.com/KhronosGroup/KTX-Software) - A suite of tools for examining, compressing and unpacking KTX2 files (including in our various codec formats) from the Khronos Group.
 - [AMD Compressonator](https://gpuopen.com/compressonator/) - .DDS viewer, can view .KTX files in some formats.
 - [PVRTexTool](https://www.imgtec.com/developers/powervr-sdk-tools/pvrtextool/) - Can view .ASTC and .KTX files in some formats. (Note: .DDS viewer seems busted for BC1, doesn't support BC7 at all.)
 - [Microsoft's DirectXTex](https://github.com/microsoft/DirectXTex) - Samples contain a basic .DDS viewer. (Note: May still have issues loading .DDS files with texture dimensions that aren't divisible by 4 texels.)
 - [RenderDoc](https://renderdoc.org/) - Reliable viewer for LDR/HDR .DDS files in BC1-7 formats.
 - [Paint.NET](https://www.getpaint.net/) - Windows app: built-in [.DDS file loading](https://github.com/0xC0000054/pdn-ddsfiletype-plus), supports BC1-7 and [cubemaps](https://github.com/0xC0000054/pdn-ddsfiletype-plus/wiki/Cube-Maps)
 - [Mali Texture Compression Tool](https://community.arm.com/support-forums/f/graphics-gaming-and-vr-forum/52390/announcement-mali-texture-compression-tool-end-of-life) - Now deprecated.
-
+- [Our GitHub wiki content statically mirrored as HTML](https://subquantumtech.com/basisu_wiki/Home.html), which lags behind the [live GitHub wiki](https://github.com/BinomialLLC/basis_universal/wiki)
+ 
 For more useful links, papers, and tools/libraries, see the end of the [UASTC HDR 4x4 texture specification](https://github.com/BinomialLLC/basis_universal/wiki/UASTC-HDR-4x4-Texture-Specification#papersfurther-reading).
 
 ----
