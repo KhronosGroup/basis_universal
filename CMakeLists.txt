@@ -36,7 +36,7 @@ option(BASISU_BUILD_PYTHON "Build native Python module via pybind11" OFF)
 # a MUCH simpler alternative to specifying RUNTIME_OUTPUT_DIRECTORY_<config>
 # for each target and each config.
 # NOTE: This means the output will be overwritten by a subsequent build for a
-# different but that is true of the alternative too.
+# different config but that is true of the alternative too.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_SOURCE_DIR}/bin>)
 
 # For MSVC builds default to SSE enabled, and determine if it's a 64-bit (-A x64) vs. 32-bit (-A Win32) build.
@@ -167,7 +167,9 @@ if (NOT MSVC AND NOT BASISU_BUILD_WASM)
                         -Wno-unused-value -Wno-unused-parameter -Wno-unused-variable
                         -Wno-misleading-indentation
                         -Wno-maybe-uninitialized -Wno-unused-function
-                        -Wno-stringop-overflow -Wno-unknown-warning-option)
+                        -Wno-stringop-overflow)
+    add_compile_options("$<$<NOT:$<CXX_COMPILER_ID:GNU>>:-Wno-unknown-warning-option>")
+
     # Add -fPIC ONLY on non-Windows platforms
     if (NOT WIN32)
         add_compile_options(-fPIC)
@@ -175,6 +177,8 @@ if (NOT MSVC AND NOT BASISU_BUILD_WASM)
 
     # AppleClang 14 raises this warning in zstd.cpp.
     add_compile_options("$<$<AND:$<CXX_COMPILER_ID:Clang,AppleClang>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,17>>:-Wno-bitwise-instead-of-logical>")
+
+    # GCC 15 raises this warning in
 
     add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wno-reorder;-Wno-class-memaccess;-Wno-deprecated-copy>")
 
