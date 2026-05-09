@@ -1,5 +1,42 @@
 # Important: The Basis Universal encoder and transcoder libraries must be compiled with -fno-strict-aliasing (MSVC's default, and also the Linux kernel).
 # It should also work without this option, but we do not test with it.
+
+# Changes from the upstream basis_universal CMakeLists.txt
+#
+# Enhancements
+#   1. Able to configure and build with any multi-config CMake generator, not just Visual Studio.
+#   2. Able to build with CMake on and for Windows with compilers other than MSVC, i.e compilers
+#      for which CMake's MSVC variable is not set: ClangCL, clang, gcc.
+#   3. Able to disable building of the `basisu` tool.
+#   4. Expose the basisu_encoder target's public dependencies, compile and link options in its
+#      target interface so they are automatically exported to _any_ application that links with
+#      the target. No need to understand and manually set them on every application target.
+#   5. Able to build on Android NDK and MinGW by handling potential absence of libpthread.
+#   6. Use add_compile_{definitions,options} and add_link_options instead of CMAKE_ global
+#      variables.
+#   7. This one is likely of interest only to a minority. Set CMAKE_OSX_DEPLOYMENT_TARGET so
+#      programs will run on an earlier version of macOS than the target of the Xcode SDK used
+#      to build it.
+#
+# Fixes
+#   - c++ compile options are only set when compiling c++ files.
+#   - The default value of `BASISU_STATIC`, is set to TRUE because, as with upstream,
+#     basisu_encoder is always built as a static library. A side effect of this change is to stop
+#     a link-time warning about setting of an rpath, something done when BASISU_STATIC is FALSE.
+#   - The libraries added when `BASISU_STATIC` is TRUE are only needed for MinGW and are now added
+#     only for MinGW.
+#
+# * Known Issues (also in upstream)
+#   - BASISU_SSE is set `if (MSVC)` so it is incorrectly set on Windows ARM and not set when
+#     compilers other than MSVC are being used, including non-Windows platforms. Users must be
+#     aware and must manually set the correct value for their circumstance.
+#   - basisu_encoder is always built as a static library so the `BASISU_STATIC` option is
+#     currently pointless.
+#   - There is no way to build with OpenCL for Windows arm64.
+#
+# Due primarily to the changes related to enhancements 1 and 4, this has about 140 fewer lines of
+# CMake code, this comment not included.
+
 cmake_minimum_required(VERSION 3.20)
 
 if (NOT CMAKE_OSX_DEPLOYMENT_TARGET)
@@ -24,7 +61,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BASISU_STATIC "static linking" TRUE) # NO-OP. basisu_encoder always built as a static library.
+option(BASISU_STATIC "static linking" TRUE) # NO-OP. basisu_encoder always built as static library.
 option(BASISU_SAN "sanitize" FALSE)
 option(BASISU_EXAMPLES "build examples" TRUE)
 option(BASISU_TOOL "build basisu tool" TRUE)
@@ -32,11 +69,10 @@ option(BASISU_WASM_THREADING "Enable WASI threading support" OFF)
 option(BASISU_BUILD_PYTHON "Build native Python module via pybind11" OFF)
 
 # Using a generator expression here prevents multi-config generators (VS, Xcode,
-# Ninja Multi-Config) from appending a per-configuration subdirectory. This is
-# a MUCH simpler alternative to specifying RUNTIME_OUTPUT_DIRECTORY_<config>
-# for each target and each config.
-# NOTE: This means the output will be overwritten by a subsequent build for a
-# different config but that is true of the alternative too.
+# Ninja Multi-Config) from appending a per-configuration subdirectory. This is a much simpler
+# alternative to specifying RUNTIME_OUTPUT_DIRECTORY_<config> for each target and each config.
+# NOTE: Setting RUNTIME_OUTPUT_DIRECTORY to an undecorated `bin` directory means the output will
+# be overwritten by subsequent builds for different build and cmake configs.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_SOURCE_DIR}/bin>)
 
 # For MSVC builds default to SSE enabled, and determine if it's a 64-bit (-A x64) vs. 32-bit (-A Win32) build.
